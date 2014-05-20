@@ -1,0 +1,125 @@
+require 'net/imap'
+require 'mail'
+require 'nokogiri'
+require 'hpricot'
+#require 'nikkou'
+#require 'charlock_holmes'
+
+# imap monkeypatch
+
+module Net
+  class IMAP
+    class ResponseParser
+      def continue_req
+        match(T_PLUS)
+        return ContinuationRequest.new(resp_text, @str)
+      end #def continue_req
+    end #class ResponseParser
+  end #class IMAP
+
+  class IMAP
+    class ResponseParser
+      def response
+        token = lookahead
+        case token.symbol
+        when T_PLUS
+          result = continue_req
+        when T_STAR
+          result = response_untagged
+        else
+          result = response_tagged
+        end
+
+        match(T_SPACE) if lookahead.symbol == T_SPACE
+        match(T_CRLF)
+        match(T_EOF)
+        return result
+      end #def response
+    end #class ResponseParser
+  end #class IMAP
+
+
+
+end #module Net
+
+
+
+puts "Enter Password"
+imapass = gets.chomp
+
+imap = Net::IMAP.new('imap.cpcc.edu', :port=>'imaps', :ssl=>true )
+imap.authenticate('PLAIN','cssrequest@cpcc.edu',imapass)
+
+
+
+imap.select('test1')
+imap.search(['ALL']).each do |message_id|
+
+    msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
+    mail = Mail.read_from_string msg
+
+#    puts mail.body.decoded
+
+
+
+    mail.part.each do |part|
+
+
+
+#      5.times do puts "NEW TABLE"
+#      end
+   
+      msgpart = part.decoded
+      msghtm = Nokogiri::HTML(msgpart)
+
+# This seems to get everything except internal and description
+#      mytest = msghtm.css("b")
+#####      mytest.each do |test|
+#####        puts "----------------------------------------"
+#####        puts test.content
+#####      end
+
+
+# This seems to get me most of the way there
+# As long as I drop the first n elements
+
+#      mytrtest = msghtm.css('tr td')
+#.drop(12)
+#      mytrtest.each do |tr|
+#      puts "-----------------------------"
+#      puts tr.content
+#      end
+
+      mytable = msghtm.css('table').drop(1)
+      mytable.each do |table|
+        myrows = table.css('tr')
+        myrows.each do |data|
+          mydata = data.css('td')
+          puts "----------------------"
+          puts mydata.text
+        end
+
+      end     
+
+
+##      stuff = msghtm.css('p')
+##      stuff.each do |things|
+##        puts things.content
+##        puts 'sjdffffffffffffffffffffffffh'
+##      end
+###      msghtm.xpath('//td//td').each do |node|
+###        puts "NOOOOOOOOOOOOOOOOOOOOOOOOOOOOODDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEEE"
+###        puts node.content
+###      end
+    end
+
+#    puts mail.methods
+#    puts mail.subject
+    
+#    puts mail.text_part.body.to_s
+#    puts mail.html_part.body.to_s
+
+end
+#imap.search(["FROM", "CPCC-ITSHelpdesk@cpcc.edu"]).each do |email|
+#  puts email
+#end
