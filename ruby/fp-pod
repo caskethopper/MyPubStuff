@@ -37,18 +37,35 @@ module Net
       end #def response
     end #class ResponseParser
   end #class IMAP
-
-
-
 end #module Net
 
 
 
-puts "Enter Password"
-imapass = gets.chomp
+## Not sure if I should prepopulate the hash keys
+## But that is what I'm doing
+## So I have that going for me
+
+issue = { "submitter" => "",
+          "sr"        => "",
+          "phone"     => "",
+          "priority"  => "",
+          "email"     => "",
+          "subject"   => "",
+          "dept"      => "",
+          "status"    => "",
+          "location"  => "",
+          "primary"   => "",
+          "cc"        => "",
+          "allass"    => "",
+          "due"       => "",
+          "desc"      => "",
+          "internal"  => "" }
+
+
+
 
 imap = Net::IMAP.new('imap.cpcc.edu', :port=>'imaps', :ssl=>true )
-imap.authenticate('PLAIN','cssrequest@cpcc.edu',imapass)
+imap.authenticate('PLAIN','cssrequest@cpcc.edu','MYPASSWORD')
 
 
 
@@ -66,8 +83,6 @@ imap.search(['ALL']).each do |message_id|
 
 
 
-#      5.times do puts "NEW TABLE"
-#      end
    
       msgpart = part.decoded
       msghtm = Nokogiri::HTML(msgpart)
@@ -90,27 +105,98 @@ imap.search(['ALL']).each do |message_id|
 #      puts tr.content
 #      end
 
-      mytable = msghtm.css('table').drop(1)
+      mytable = msghtm.css('table').drop(3)
       mytable.each do |table|
         myrows = table.css('tr')
         myrows.each do |data|
           mydata = data.css('td')
-          puts "----------------------"
-          puts mydata.text
+          mydata.each do |node|
+            entry = node.children
+              #puts "========================"
+              #puts entry.text.gsub(/[^0-9a-z: ]/i, '').strip
+            entry_eval = entry.text.gsub(/[^0-9a-z: ]/i, '').strip
+            case entry_eval
+            when "Name:"
+              issue[:submitter] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "Service Request Number:"
+              issue[:sr] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "Phone:"
+              issue[:phone] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "Priority:"
+              issue[:priority] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "Email Address:"
+              issue[:email] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "Subject:"
+              issue[:subject] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "Department:"
+              issue[:dept] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "Status:"
+              issue[:status] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "Location:"
+              issue[:location] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "Primary Assignment:"
+              issue[:primary] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "CCs:"
+              issue[:cc] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "All Assignees Involved:"
+              issue[:allass] = node.next_element.text.gsub(/\s+/, ' ').strip
+            when "SLA Due Date:"
+              issue[:due] = node.next_element.text.gsub(/\s+/, ' ').strip
+            end
+
+            if entry_eval.start_with?('Description:')
+              mydescription = node.text.gsub(/\s+/, ' ').strip.sub('Description:','')
+##.split(/(Entered.*:)/)
+              mydescription = mydescription.rpartition(/(Entered.*:)/)
+              #mydescription.each do |subdesc| 
+              #  puts "---------description--------"
+              #  puts subdesc
+              #end
+              puts mydescription
+            elsif entry_eval.start_with?('Internal:')
+              myinternal = node.text.gsub(/\s+/, ' ').strip.sub('Internal:','')
+##.split(/(Entered.*:)/)
+              myinternal.rpartition(/(Entered.*:)/)
+              #myinternal.each do |subint|
+#
+#                puts "----------internal----------"
+#                puts subint
+             #end
+            end
+#            puts "--------------CHILDREN"
+#            puts text.children
+#            puts "--------------ELEMENTS"
+#            puts text.elements
+#            output = text.css('b')
+#            output.each do |results|
+#              #puts "----------------------"
+#              field = results.text
+#              puts field.strip
+#              case field
+##              if field.include? "Description:"
+##                myparent = results.parent.parent
+##                mytext = myparent.text
+##                mydescription = mytext.sub('Description:','').split(/(Entered.*:)/)
+##                mydescription.each do |desc|
+##                  #puts "==============="
+##                  #puts desc
+##                end
+##                 
+##              elsif field.include? "Internal:"
+##                myparent = results.parent.parent.parent
+##                mytext = myparent.text
+##                myinternal =  mytext.sub('Internal:','').split(/(Entered.*:)/)
+##                myinternal.each do |internal|
+##                  #puts "==============="
+##                  #puts internal
+##                end
+##              end
+##            end
+          end
         end
 
       end     
 
-
-##      stuff = msghtm.css('p')
-##      stuff.each do |things|
-##        puts things.content
-##        puts 'sjdffffffffffffffffffffffffh'
-##      end
-###      msghtm.xpath('//td//td').each do |node|
-###        puts "NOOOOOOOOOOOOOOOOOOOOOOOOOOOOODDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEEE"
-###        puts node.content
-###      end
     end
 
 #    puts mail.methods
@@ -120,6 +206,3 @@ imap.search(['ALL']).each do |message_id|
 #    puts mail.html_part.body.to_s
 
 end
-#imap.search(["FROM", "CPCC-ITSHelpdesk@cpcc.edu"]).each do |email|
-#  puts email
-#end
