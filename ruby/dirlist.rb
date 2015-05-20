@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+#Quick script to search folder for a friend
 
 print "Enter the path to scan:"
 mypath = gets.chomp
