@@ -1,3 +1,7 @@
+#I slammed this together to crawl a small biz website for the owner
+#It's hardcoded to crawl dubendorfer.biz atm
+#IIRC, it's also going to traverse external links, so potential for issue is there
+
 require 'nokogiri'
 require 'httparty'
 
