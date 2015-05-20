@@ -1,3 +1,7 @@
+#This was a super hacky attempt to parse html emails using nokogiri
+#It's poorly commented and probably not my best work, but I'm going to hold on to it for posterity
+
+
 require 'net/imap'
 require 'mail'
 require 'nokogiri'
