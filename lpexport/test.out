@@ -1,0 +1,1164 @@
+Waiting a sec
+bbmonitor
+1
+Matt Rubright
+Break/Fix
+<p>&nbsp;</p>
+<p>#1: New WWW Status page appears to be pulling the same information for both "SLB-Primary" and "SLB-Backup". &nbsp;Please adjust this so they're pulling from the respective SLB.</p>
+<p>#2 &nbsp;Two new front ends have been added to WebAdvisor: waf7-central and waf8-central. &nbsp;Please add to the WebAdvisor page.</p>
+Matt Rubright said: Done and done. The SharePointz page had the same problem as WWW, so I fixed it too. That change only takes a second. The WAF page additions are what took up most of the time. 
+Waiting a sec
+People - Index.html not working
+1
+Chad Campbell
+Break/Fix
+<p>The People.cpcc.edu web redirect was updated for the username change pilot.</p>
+<p>Previously, incoming requests could be accepted in the format http://people.cpcc.edu/~username or http://first.last.people.cpcc.edu. The modification was made to accept requests coming into the ~username format and pass it back through the Apache redirect engine with the first.last.people.cpcc.edu format.</p>
+<p>In the course of making this change, index.html was broken so that it no longer automatically loads when placed in the root of the folder.</p>
+Matt Rubright said: Re-assigned back to Chad for implementation. 
+Matt Rubright said: I have a tested a functional configuration which fixes the index.html issue. It also corrects a problem I noted where the parent directory link wasn't working. The heart of the issue was that this rewrite rule ...
+
+RewriteRule ^(.*)\.people\.cpcc\.edu(.*) /route/${user-map:$1}/www$2 [PT]
+
+... was being called repeatedly. I've changed the flag so that it only gets called once *and* it skips the next two rules when it applies at all. Also, I added a default to the reverse mapping lookup so that you end up with a real URL, even when the lookup fails (covering situations where a person might leave and there are old links around.) 
+
+Since I don't feel it's my place to make changes to production systems like this without advance warning, I thought I would leave that part to you. The new configuration is in /home/cagwmatt/newpeopleconfig.txt. You just need to replace /etc/apache2/sites-enabled/people.cpcc.edu with it and reload apache to make it work. 
+Chad Campbell said: Matt, you are correct in your assessment of how it should process incoming requests. 
+Matt Rubright said: Built test environment and have it working with the old configuration. 
+Matt Rubright said: I'm moving forward with building a test environment of my own to try different configurations. Please clarify if anything I've written in the last update is incorrect. 
+Matt Rubright said: Looking more closely into this, I'm a little confused about what exactly you're trying to do and at what state the SNAPe account conversion is. Are all users now moved over to the new account names? I'm mostly just curious about that. 
+
+Would you please step through some details of what you want the redirects and rewrites to do. I see some steps which appear a bit fragile and maybe more complex than they need to be. Let me take a stab at what I *think* you're trying to do:
+
+1) If a URL comes in with http://people.cpcc.edu/~OLDUSERNAME we want it to rewrite to http://first.last.people.cpcc.edu, rendering any index.html which it finds in U:\NEWUSERNAME\www.
+2) If a URL comes in with http://people.cpcc.edu/~NEWUSERNAME we want it to rewrite to http://first.last.people.cpcc.edu, rendering any index.html which it finds in U:\NEWUSERNAME\www.
+3) If a URL comes in with http://first.last.people.cpcc.edu, we want it to render any index.html which it finds in U:\NEWUSERNAME\www 
+Matt Rubright said: Gathering data on the configuration and doing some analysis. Also, the server was out of disk space again, so I performed the same steps as last time. Any need for the log files in question are available in the home directory of 'logfiles' on sysmon-central. 
+Matt Rubright said: Started looking into this but found the server out of disk space. The culprit looks to be the 'test.people.rewrite.log' files. I moved everything older than .20. out to a tarfile on sysmon-central in /home/logfiles. Don't know if you actually need them or not. 
+
+Will pick back up on the original problem in the next few days. 
+Matt Rubright said: Still waiting for account and key to be installed. 
+Waiting a sec
+People - Fix reverse username mapping
+1
+Matt Rubright
+Break/Fix
+<p>The reverse mapping file created to maintain the old URL format (people.cpcc.edu/~username) is not operational. I suspect it was overwritten.</p>
+<p>The redirect will need to be modified and a new reverse mapping created from the SnapE user list.</p>
+Matt Rubright said: Please see update for 'index.html not working' 
+Matt Rubright said: Still waiting for account and key to be installed. 
+Chad Campbell said: I added a mapping file that should have both pilot groups and final SnapE users. Should have all of the data you might need to build a static reverse map. 
+Done.
+FILENAME
+mappingfile.csv
+PTID
+174174566
+DIRMK
+./Break-Fix/No Project Defined/7159060-People - Fix reverse username mapping
+PODBOD
+{"mimetype"=>"text/csv", "perma_link"=>nil, "hosted_by"=>"podio", "replaces"=>[], "description"=>nil, "hosted_by_humanized_name"=>"Podio", "presence"=>nil, "created_via"=>{"url"=>nil, "auth_client_id"=>10609, "display"=>true, "name"=>"lp-archive", "id"=>10609}, "created_by"=>{"user_id"=>1976861, "name"=>"Chad Campbell", "url"=>"https://podio.com/users/1976861", "type"=>"user", "image"=>{"hosted_by"=>"podio", "hosted_by_humanized_name"=>"Podio", "thumbnail_link"=>"https://d2cmuesa4snpwn.cloudfront.net/public/109794759", "link"=>"https://d2cmuesa4snpwn.cloudfront.net/public/109794759", "file_id"=>109794759, "link_target"=>"_blank"}, "avatar_type"=>"file", "avatar"=>109794759, "id"=>1976861, "avatar_id"=>109794759, "last_seen_on"=>"2014-07-09 20:53:19"}, "thumbnail_link"=>nil, "created_on"=>"2014-07-09 20:53:21", "link"=>"https://files.podio.com/110106900", "file_id"=>110106900, "push"=>nil, "rights"=>["view", "download", "delete", "update"], "link_target"=>"_self", "size"=>98664, "name"=>"mappingfile.csv"}
+PODFILEID
+110106900
+File Complete
+Waiting a sec
+AIMS - Down
+1
+Chad Campbell
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+Coordinate with Justin to check Forefront for Exchange
+1
+Jordyn Newton
+Break/Fix
+NONE
+Jordyn Newton said: I'm going to mark this one as complete. Even though i had problems getting the engines updated on a few servers, we're atleast protected by a few others on each server and i've been seeing things stopped at the hub transport servers so i feel we're in a better position. With the exchange upgrade coming in the next few months, i don't feel it's worth the time to dig in any deeper, and my efforts would be better served at getting the upgrade started. 
+Jordyn Newton said: i've installed the forefront client on xca2-central and set up notifications to justin and spam mailbox for all hub transport and mailbox servers. I was still unable to update the scan engines on clustered resources as well as xca2-central. 
+Jordyn Newton said: Some of the engines wouldn't receive updates, so i renamed the folder for the failing engine at \Program Files (x86)\Microsoft Forefront Security\Exchange Server\Data\Engines\x86\ which worked on the hub transport servers, as well as x7s1, but the clustered mailbox stores it doesn't seem to work on, even after navigating to the correct directory on P:\ForefrontCluster\Engines\x86, i rename, a new one is created, yet the old date for last date of update exists from 2011. 
+Jordyn Newton said: I've found that there's a few retired engines still being used to scan. I've went through and made sure we're using the ones that are still receiving updates, and disabled the retired ones. I set up notifications for xht1 and xht2, but the mailbox servers will require a bit more time for tweaking out false positives and limiting the amount of notifications that are being sent. We're getting notifications for voicemails and regular office documents.
+
+Also, xca2-central didn't have forefront for exchange installed with it being used as a hub transport server. I didn't see the software on msmgt1-central, nor the other exchange servers where it was already installed, nor the usual share locations of pubapps and shared applications. I also checked licensing folder for a serial number that i could use with the trial version that's freely available on MS website. I think i'll need you to hook me up with the serial from wherever it may be. 
+Chad Campbell said: @Jordyn Please update and close this task if you have checked on forefront and set up notifications for Justin 
+Waiting a sec
+LW3 Dropping Connections
+1
+Marcus Redlinger
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+Update Nagios
+1
+Matt Rubright
+Break/Fix
+NONE
+Matt Rubright said: The Education Center devices have been added to the rad1-central RADIUS configuration and sync'd to nat2-central. The same shared secret has been used as the rest of the Avaya equipment at Central campus. Changes will still need to be made to the switches themselves. 
+Ryan Moore said: Account added, key installed, sudoers updated (replicated from account on sysmon-central) 
+Chad Campbell said: @Ryan Can you help Matt with access to rad1-central? 
+Matt Rubright said: @Chad: FYI - I'm on hold with this one pending access to rad1-central. 
+Matt Rubright said: I've updated the name as you requested, replacing 'TWTC' with 'WiFi Bridge'. I'm still waiting for access to rad1-central so I can make the RADIUS changes you asked for. 
+Patrick Dugan said: @Matt:
+
+"WiFi Bridge" 
+Patrick Dugan said: From: Patrick Dugan (Patrick.Dugan@cpcc.edu (mailto:Patrick.Dugan@cpcc.edu)) 
+
+To: re7691335-819f8dcd0d3ca74c@in.liquidplanner.com (mailto:re7691335-819f8dcd0d3ca74c@in.liquidplanner.com) 
+
+Subject: RE:Update Nagios 
+
+"WiFi Bridge"
+
+Sent from my Verizon Wireless 4G LTE DROID 
+Matt Rubright said: @Patrick :
+
+Okay, that makes sense. As an aside, how do you want to describe these links? The other intercampus links are called 'TWTC' and 'BSME'. 
+Patrick Dugan said: @Matt:
+
+Per my email...
+
+"That's on purpose.  We're temporarily testing our WiFi bridge link to see how performant it is.  So we wanted it to be the only link for a while.
+
+We bought some properties close to the central campus recently and cabinet is telling us they want to inexpensively bring them up.  Before i put all my eggs in the wifi bridge basket i wanted a proof of concept.
+
+ 
+
+I believe Tam has the OSPF interface off on the core side to make this happen." 
+Matt Rubright said: All these devices have been added to Nagios. I have pre-acknowledged the BSME check on ec-290-rr2 since it looks to be routing through rr1 at the moment, rather than over a MetroE link. I don't know if this is supposed to be by design, but I suspect it isn't?
+
+Before I can add the devices to RADIUS, I'll need to have my account's key installed on rad1-central. Please let me know when that's done. 
+Patrick Dugan said: We need the following devices added to nagios for checks. The routing devices need the routing table check added aswell. The "EC" devices need to be added into radius also:
+
+wtvi-197-rr1 (10.95.250.2)
+
+wtvi-197-rr2 (10.95.250.3)
+
+wtvi-197-s1 (10.95.250.22)
+
+wtvi-197-s2 (10.95.250.23)
+
+ec-290-rr1 (10.91.250.2)
+
+ec-290-rr2 (10.91.250.3)
+
+ec-290-s1 (10.91.250.10) 
+Patrick Dugan said: @Matt:
+
+We need the following devices added to nagios for checks.  The routing devices need the routing table check added aswell.  The "EC" devices need to be added into radius also:
+
+wtvi-197-rr1 (10.95.250.2)
+
+wtvi-197-rr2 (10.95.250.3)
+
+wtvi-197-s1 (10.95.250.22)
+
+wtvi-197-s2 (10.95.250.23)
+
+ec-290-rr1 (10.91.250.2)
+
+ec-290-rr2 (10.91.250.3)
+
+ec-290-s1 (10.91.250.10) 
+Matt Rubright said: Hi Pat. Can you tell me more specifically what it is you're asking me to do? Do you want me to fix something that's not working or add/remove service checks?
+
+Matt 
+Waiting a sec
+Lock down the "bridge" SSID - Meraki
+1
+Jonathan Garrett
+Break/Fix
+<p>Currently the SSID used for the EC bridge is configured as an open SSID. &nbsp;Determine how to lock this down, then schedule a time to make the changes without impacting the clients who use it.</p>
+Jonathan Garrett said: The Meraki "Bridge" SSID has been hidden and locked down using WPA2-PSK. The pre-shared key has been given to Tam to update the password list. 
+Jonathan Garrett said: Plan is to lock down the Meraki bridge using the same security settings as CPCCSecure. I will need assistance with this as some of the settings information I do not know. 
+Jonathan Garrett said: I am in communication with Meraki and we are working together to come up with a plan to lock down the EC Bridge. 
+Jonathan Garrett said: The EC bridge SSID has been hidden (no longer broadcasting). I am investigating to see if additional steps are needed to ensure that it is secure. 
+Waiting a sec
+EC BSME handoff
+1
+Tam Nguyen
+Break/Fix
+NONE
+Tam Nguyen said: This has been done. 
+Waiting a sec
+EC-WifiMAN link handoff
+1
+Tam Nguyen
+Break/Fix
+NONE
+Tam Nguyen said: This is now done. The fiber and the switch has been removed. A copper SFP is now in port 12 of EC-290-RR1. The EC-WifiMAN link is fully copper from EC-bridged AP to EC-290-RR1. 
+Waiting a sec
+WTVI TWTC handoff
+1
+Tam Nguyen
+Break/Fix
+NONE
+Tam Nguyen said: WTVI TWTC link is now fully copper handoff. All fibers have been removed. 
+Waiting a sec
+BR1 and BR2 - CPU module return
+1
+Tam Nguyen
+Break/Fix
+<p>Return the two CPU modules to Avaya for the RMA</p>
+Tam Nguyen said: Both CPUs have been shipped back to Avaya. 
+Tam Nguyen said: Plan on returning them during spring break. 
+Waiting a sec
+WTVI - TWBC network usage
+1
+Tam Nguyen
+Break/Fix
+<p>Determine why Cacti is reporting no or close to no traffic on the TWBC link</p>
+Tam Nguyen said: This should now be resolved. It turned out that the graph was pointing to the wrong device (it was pointed to ec-290-rr2) 
+Waiting a sec
+Nagios ARP checks
+1
+Matt Rubright
+Break/Fix
+<p>I would like to create checks for the ARP entries on both the Avaya 5530 and 5632's that we use for distribution routers. The hardware limit for the 5530's is 1500 and for the 5632's is 2500. I would like nagios to warn us when they get 80% full and alert us once we hit our max for the respective model.</p>
+<p>Avaya ERS5530's:</p>
+<ul>
+<li>10.42.1.2</li>
+<li>10.42.1.3</li>
+<li>10.85.1.2</li>
+<li>10.85.1.3</li>
+<li>10.81.1.2</li>
+<li>10.81.1.3</li>
+<li>10.70.1.2</li>
+<li>10.70.1.3</li>
+<li>10.31.2.2</li>
+<li>10.31.2.3</li>
+<li>10.10.250.1</li>
+<li>10.2.250.1</li>
+<li>10.64.250.1</li>
+<li>10.35.250.1</li>
+</ul>
+<div>&nbsp;</div>
+<div>Avaya ERS5632's:</div>
+<div>&nbsp;</div>
+<div>
+<ul>
+<li>10.95.250.2</li>
+<li>10.95.250.3</li>
+<li>10.91.250.2</li>
+<li>10.91.250.3</li>
+<li>10.45.250.1</li>
+<li>10.9.250.2</li>
+<li>10.9.250.3</li>
+</ul>
+</div>
+Matt Rubright said: The script has been written and tied into Nagios. I took some liberties in interpreting what you want and in setting defaults. The check will be performed approximately every 15 minutes. If the result is under 80% full, it will indicate things are okay. If the result is between 80% an 97% full, it will set a warning state in the monitoring interface, but it will not email anyone. If the result is 98% full or above, the interface will show a critical state and it will email the groups defined for all the other services for each router.
+
+Please let me know if you'd like any of these defaults changed. Otherwise, this task is complete.
+
+Matt 
+Matt Rubright said: Please upload the MIBs for the version of code you're running. I'll need this to gather the ARP table information. 
+Waiting a sec
+Nagios - te-401-dr1 change
+1
+Matt Rubright
+Break/Fix
+<p>We're replacing te-401-dr1 with two ERS5632's. &nbsp;We need the monitoring to change as well.</p>
+<p>New devices:</p>
+<ul>
+<li>te-401-rr1 10.9.250.2</li>
+<li>te-401-rr2 10.9.250.3</li>
+</ul>
+<div>&nbsp;</div>
+<div>Please change the checks to the new addresses and remove the old. &nbsp;Since we change the redundancy from stacking to VRRP/SMLT I would like to add the routing table checks to verify the P2P links are up and functional.</div>
+Matt Rubright said: Completed as requested. 
+Patrick Dugan said: @Matt:
+0815Bq5h8d ro
+8f26zCFH65 rw 
+Matt Rubright said: For some reason the SNMP checks to all the remote campus routers are failing. I'm thinking that perhaps a code upgrade has been applied or a change in the SNMP community strings has been made. Sent a message to Pat to verify. 
+Waiting a sec
+NAT2 - Add 10.41.0.1/20 to eth0.1820
+1
+Marcus Redlinger
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+NAT2 - Add DHCP Scope for 10.41.0.0/20
+1
+Marcus Redlinger
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+NAT2 - Add Routes for 10.41.0.0/20
+1
+Marcus Redlinger
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+NAT2 - Add entries for 10.41.0.0/20 into IP Tables
+1
+Marcus Redlinger
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+Palo Alto - Add NAT policy for 10.41.0.0/20
+1
+Patrick Dugan
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+Check remote RAD1-<campus name> servers for route entries relating to 10.41.20.0/22
+1
+Marcus Redlinger
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+Change IP Addresses for CE-WH (VID 1820) to 10.41.0.X/20
+1
+Tam Nguyen
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+Host file - Wireless Switches
+1
+Tam Nguyen
+Break/Fix
+<p>Host File Update:</p>
+<ul>
+<li>te-401-wss1 10.9.250.40</li>
+<li>te-401-wss2 10.9.250.41</li>
+<li>te-401-wss3 10.9.250.42</li>
+</ul>
+Tam Nguyen said: This task is done. 
+Tam Nguyen said: Changes has been modified to HOSTS file on slog2-central as follows:
+te-401-wss1 10.9.250.240
+te-401-wss2 10.9.250.241
+te-401-wss3 10.9.250.242 
+Waiting a sec
+Organize a meeting with ipConfigure and CSS to determine the state of VMS
+1
+Tam Nguyen
+Break/Fix
+NONE
+Tam Nguyen said: Meeting is scheduled for today from 2:00 p.m. - 3:00 p.m. (bridge call) 
+Waiting a sec
+CPCCSecure at WTVI
+1
+Jonathan Garrett
+Break/Fix
+<p>Originally we deployed the Meraki APs at WTVI as a test. &nbsp;For security purposes, we used the WTVI internet connect for user traffic. &nbsp;Because this is a seperate network, and the CPCCSecure RADIUS setup is pointing to internal servers we couldn't beacon CPCCSecure.</p>
+<p>For some reason, CPCCSecure is currently beaconing at WTVI and for the reasons stated above isn't working.</p>
+<ul>
+<li>Change the vlan configuration on the AP ports to the correct internal wireless vlan</li>
+<li>test the APs to make sure they're working correctly</li>
+</ul>
+Jonathan Garrett said: I removed the the APs from VID 4000 and placed them in VID 1726. All SSIDs have been tested and I walked through WTVI and ensured connectivity throughout. 
+Waiting a sec
+GLV1-Central
+1
+Marcus Redlinger
+Break/Fix
+<p>GLV1-Central is responding sluggishly to use by DMS for Extron systems.</p>
+<p>Action Items:</p>
+<ul>
+<li>Identify any potential hardware resource constraints</li>
+<li>Add resources where appropriate</li>
+<li>Make any other relevant suggestions to Kris Motto and DMS</li>
+</ul>
+Marcus Redlinger said: Followed up with Kris, and he is no longer experiencing any performance issues with the server. 
+Marcus Redlinger said: I setup monitoring on the server and did not see any hardware constraints. The only complaint Kris had was in regards to sluggish login times, and when connecting to remote devices. I noticed that the secondary DNS entry was pointing to AD7-Central. I changed this to AD8-Central and asked him to see if this resolved the sluggish connection behavior. I am awaiting a response from Kris. 
+Waiting a sec
+BBMonitor - SNMP Change
+1
+Matt Rubright
+Break/Fix
+<p>The interface utilization graphs aren't working. &nbsp;I'm assuming this is related to the recent SNMP change. &nbsp;Please correct BBMonitor</p>
+Matt Rubright said: Yes, the SNMP strings needed to be updated for MRTG - the polling and graphing tool used to generate those graphs. The configuration file is /etc/mrtg.cfg. The graphs should start looking more normal after an hour or two. 
+Waiting a sec
+BBMonitor - Collect Usage Date
+1
+Matt Rubright
+Break/Fix
+<p>I would like to collect historic data of the session counts shown in BBMonitor. &nbsp;Is there a way of doing this?</p>
+<p>&nbsp;</p>
+<p>Example: &nbsp;on the page for SharePoint, I would like to see the not only the current usage, but also the peak and average given a certain span of time.</p>
+Matt Rubright said: The rest of the graphs have been completed and are listed under the 'Server Load Balancing' group. 
+Matt Rubright said: @Patrick I have www and blackboard set up in Cacti. www has been collecting data for a week or so now. Have a look at the Graph tree at the bottom under the 'Major Services' heading. There's a new grouping called 'Server Load Balancing' which will have graphs from each load balancer for each service. Of course, only one graph will have data at a time, but collecting from both will make it possible to continue gathering data even if a failover occurs. I'll get the other services added hopefully by the end of this week. 
+Patrick Dugan said: I would like historical data on all the services listed on BBMonitor.  I don't need the graphs for the individual server sessions, just the whole.  I would like to have hard numbers for these services to see if they match up with the claims being made. 
+Matt Rubright said: I believe that Cacti can do that similar to the way you have historical data for the UPS temperatures. Can you tell me if you want historical data on all the services or just some of them? Also - will you want graphs to show individual server sessions or just the service as a whole? 
+Waiting a sec
+CPCC ITS Leadership Group
+1
+Chad Campbell
+Break/Fix
+<p>email group is not accurate anymore. &nbsp;need to add at least the following</p>
+<ul>
+<li>Susan Hunter</li>
+<li>Kara Bosch?</li>
+<li>Justin Harwood</li>
+<li>Chad Campbell</li>
+<li>Ben Dowling</li>
+<li>Chris Emery</li>
+<li>Julie Sparks</li>
+<li>James Hilier</li>
+</ul>
+<div>&nbsp;</div>
+<div>Please remove those in the list who are no longer with the college.</div>
+Patrick Dugan said: Spoke with Ben Dowling yesterday, he stated this was complete. We worked with Jordyn to have it completed. 
+Waiting a sec
+Recreate golden images in VMWare
+1
+Marcus Redlinger
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+Research Unknown Issues for 1/31 data center outage
+1
+Chad Campbell
+Break/Fix
+<div>&nbsp;</div>
+<div>
+<ul>
+<li>m5000 time skew issue. &nbsp;We need to do our best to determine why that server skewed its time that drasiticly in that short of a time period.</li>
+<li>We need to determine why NS2 stopped resolving names (if it was related to the hardware issue or not)</li>
+<li>We need to determine how the NIC teaming on the SharePoint frontends is configured</li>
+<li>We need to determine how the load balancing on SharePoint is configured</li>
+</ul>
+</div>
+No Comments
+Waiting a sec
+Research why SLB1 panicked on 1/9
+1
+Tam Nguyen
+Break/Fix
+<p>Determine why te-401-slb1 paniced on 1/9/13. &nbsp;Is there newer code that will keep this from happening in the future.</p>
+Tam Nguyen said: Inquired Radware about a workaround. Radware replied,"The only work around would be to stop scanning the device. Are you running a security scan of some sorts periodically to the Alteon, or some other scan? If so that is what is triggering the panic..." 
+Tam Nguyen said: Per Radware:
+"Engineering has been able to match the panic file you provided. According to our findings this the same panic as you provide us with almost a year ago and it matches bug ID prod00160681. According to Engineering the panic occurs during a scan. Unfortunately, there is no fix for this particular panic at this time." 
+Tam Nguyen said: I have sent over the panic file per Radware request. 
+Tam Nguyen said: I have opened a ticket with Radware concerning this panic. Will update when more info is available. 
+Waiting a sec
+SPD3 Generator Circuits
+1
+Jonathan Garrett
+Break/Fix
+<p>Both telecom rooms in SPD3 (mdf and idf) should have their UPS plugged into a generator protected circuit. &nbsp;There was a power outage/issue at SPD3 on 4/1 starting ~4:45am. &nbsp;We need to determine why our UPS did not recieved power from the generator.</p>
+Jonathan Garrett said: I talked with Facilities and found that Duke Energy had issues with their equipment and the power did switch over to the generator, but the generator ran out of fuel. The UPS is on a protected circuit. Faclities has address the issue with the generator. 
+Waiting a sec
+Determine why Nagios reported at-292-dr1 offline - 2:08pm 3/29/2013
+1
+Tam Nguyen
+Break/Fix
+NONE
+Tam Nguyen said: Unit#1 rebooted of a two units stack and stack force-mode is not enabled. This would explained why Nagios reported at-292-dr1 being down during the reboot. I believe the issue was more of an electrical issue than it was the stack issue. So far, we have not had anymore issue with the stack. However, there is still the wiring fault issue at AT292. Brooks is looking into the wiring fault issue. 
+Waiting a sec
+GUEST VLAN (410) - Redundancy
+1
+Tam Nguyen
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+Plug te-401-rr2 into other PDU
+1
+Jonathan Garrett
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+All vlans spreadsheet cleanup
+1
+Brooks Bevil
+Break/Fix
+<ol>
+<li>change all the te-401-dr1 entries to te-401-rr1. &nbsp;The addresses will need to change to x.x.x.2 (from x.x.x.1)</li>
+<li>add entries for all vlans for te-401-rr2. The addresses will be x.x.x.3</li>
+</ol>
+Brooks Bevil said: Updated with the required changes. 
+Waiting a sec
+Add te-401-rr1/rr2 into host table
+1
+Tam Nguyen
+Break/Fix
+NONE
+Tam Nguyen said: This task has been done. 
+Tam Nguyen said: Added to HOSTS file on slog2-central:
+te-401-rr1 10.9.250.2
+te-401-rr2 10.9.250.3 
+Waiting a sec
+Add te-401-rr1/rr2 into Cacti
+1
+Tam Nguyen
+Break/Fix
+NONE
+Tam Nguyen said: This is done. Right now, I have CR1/CR2, TE-401-S1, TE-111-S1 ports graphed. 
+Waiting a sec
+Add RADIUS on te-401-rr1/rr2
+1
+Tam Nguyen
+Break/Fix
+NONE
+No Comments
+Waiting a sec
+remove te-401-dr1, restore to default and place in te111
+1
+Jonathan Garrett
+Break/Fix
+NONE
+Jonathan Garrett said: TE-401-dr1 has been removed and the cable management has been put in place. 
+Patrick Dugan said: put the 1U cable management back in place under the patch panel 
+Waiting a sec
+Add te-401-rr1/rr2 into Kiwi CatTools
+1
+Tam Nguyen
+Break/Fix
+NONE
+Tam Nguyen said: TE-401-RR1 and RR2 are now added to Kiwi CatTools. 
+Waiting a sec
+Splunk> - make sure Splunk is looking at te-401-rr1/rr2
+1
+Tam Nguyen
+Break/Fix
+NONE
+Tam Nguyen said: Splunk has now been configured to look at te-401-rr1/rr2. 
+Waiting a sec
+Nagios - Lync Cert Check
+1
+Matt Rubright
+Break/Fix
+<p>Create a Nagios alert/warning for the Lync Cert</p>
+Chad Campbell said: @Matt Sorry, I've been unable to get in and touch these recently. I have a consultant working to gather the certs at this moment. 
+Matt Rubright said: @Chad : Just following up on this ... Here's what I asked shortly after you assigned this over to me - "Sure. Please let me know what the current list of Lync servers is and, if you know, how many individual certificates there are supposed to be.
+
+I recall that there were some which were purchased through DigiCert and others which were internally signed. Do you want all of them to be monitored?" 
+Matt Rubright said: @Chad Sure. Please let me know what the current list of Lync servers is and, if you know, how many individual certificates there are supposed to be. 
+
+I recall that there were some which were purchased through DigiCert and others which were internally signed. Do you want all of them to be monitored? 
+Chad Campbell said: @Matt Can you assist with this? Let me know if you can and I will get you access to the lync fe's. 
+Waiting a sec
+nagios - radius check
+1
+Matt Rubright
+Break/Fix
+NONE
+Matt Rubright said: I will need to have temporary access to one of the auth servers in order to accomplish this. Please allow the 'cagwmatt' account login and read rights to one of them. 
+Waiting a sec
+atc 292 ups mgmt card
+1
+Tam Nguyen
+Break/Fix
+<ul>
+<li>add and configure MGMT card&nbsp;</li>
+<li>add to ISX Central</li>
+<li>Report to Facilities the wiring fault issue</li>
+</ul>
+Tam Nguyen said: Brooks was able to install and configure the MGMT card on both of the UPSes at AT292 closet. He also was able to add them to ISX Central. 
+Waiting a sec
+Enable EC's redundancy
+1
+Tam Nguyen
+Break/Fix
+<p>enable the redundancy for EC "man" links</p>
+Tam Nguyen said: Avaya has now determined that issue lies with the MLT loadbalance settings on te-402-ss3 and ss3.5. They recommended that we change the MLT loadbalancing setting from "Advance" to "Basic". Planning to make changes on non-production time. 
+Tam Nguyen said: Avaya was able to duplicate the issue in their lab. It is now pointing toward the RSMLT configuration between the server core routers (SR1/SR2) and the server core switches (ss3 and ss3.5). Avaya has not determined the root cause but was able to provide some workarounds. 
+Tam Nguyen said: Working with Avaya to determne why when both lonks are up, DHCP no longer work properly. 
+Waiting a sec
+Service Outage: OC196-M4000
+1
+Ryan Moore
+Break/Fix
+<table class='email_envelope'>        <tr>
+          <th>From:</th>
+          <td>Chad Campbell (<a href="mailto:Chad.Campbell@cpcc.edu">Chad.Campbell@cpcc.edu</a>)</td>
+        </tr>
+
+        <tr>
+          <th>To:</th>
+          <td><a href="mailto:10071626-819f8dcd0d3ca74c@in.liquidplanner.com">10071626-819f8dcd0d3ca74c@in.liquidplanner.com</a></td>
+        </tr>
+
+        <tr>
+          <th>Subject:</th>
+          <td>Service Outage: OC196-M4000</td>
+        </tr>
+</table><br/><div class='email_html'><div class="WordSection1">
+<p class="MsoNormal">The server is currently not completing its boot cycle. HD-0 lights up solid green, but HD-1 goes into a blinking green state.</p>
+<p class="MsoNormal">Fmdump –m output:</p>
+<p class="MsoNormal">MSG-ID: SCF-8001-KC, TYPE: upset, VER: 1, SEVERITY: Critical</p>
+<p class="MsoNormal">EVENT-TIME: Fri Jul 26 11:05:52 EDT 2013</p>
+<p class="MsoNormal">PLATFORM: SPARC Enterprise M4000, CSN: BEF0913174, HOSTNAME: oc196-m4000-xscf</p>
+<p class="MsoNormal">SOURCE: sde, REV: 1.17</p>
+<p class="MsoNormal">EVENT-ID: a52d634c-39f7-47f8-ac49-83afa2e2fd46</p>
+<p class="MsoNormal">DESC: Failure to boot Solaris on a domain via an internal disk drive on the SAS controller.</p>
+<p class="MsoNormal">Refer to http://www.sun.com/msg/SCF-8001-KC for more information.</p>
+<p class="MsoNormal">AUTO-RESPONSE: Nothing is deconfigured.</p>
+<p class="MsoNormal">IMPACT: The domain drops to the OpenBoot PROM 'ok' prompt.</p>
+<p class="MsoNormal">REC-ACTION: The platform administrator should investigate the cause of the boot problem</p>
+<p class="MsoNormal">and schedule a service action, if necessary.</p>
+<p class="MsoNormal">Please consult the detail section of the knowledge article for additional information.</p>
+<p class="MsoNormal">Additional info:</p>
+<p class="MsoNormal">XSCF&gt; showstatus</p>
+<p class="MsoNormal">No failures found in System Initialization.</p>
+<p class="MsoNormal">XSCF&gt; showdomainmode -d 00</p>
+<p class="MsoNormal">Host-ID             :85284298</p>
+<p class="MsoNormal">Diagnostic Level    :min</p>
+<p class="MsoNormal">Secure Mode         :on</p>
+<p class="MsoNormal">Autoboot            :on</p>
+<p class="MsoNormal">CPU Mode            :auto</p>
+<p class="MsoNormal">--</p>
+<p class="MsoNormal"><i>Chad Campbell</i></p>
+<p class="MsoNormal"><i>Director of Core Systems and Telecommunications</i></p>
+<p class="MsoNormal"><i>Central Piedmont Community College</i></p>
+<p class="MsoNormal"><i>Information Technology Services</i></p>
+<p class="MsoNormal"><i>Ph: 704.330.6598</i></p>
+<p class="MsoNormal"><i>Fax: 704.330.5490</i></p>
+</div></div>
+Ryan Moore said: @Chad Just about, I was keeping it open until the Oracle SR was closed out, which should happen once they process the returned drive. If you'd prefer to close it go ahead and I can track it manually myself. 
+Chad Campbell said: @Ryan Is this ready to be closed? 
+Ryan Moore said: From: Ryan Moore (ryan.moore@cpcc.edu (mailto:ryan.moore@cpcc.edu)) 
+
+To: 10071827-819f8dcd0d3ca74c@in.liquidplanner.com (mailto:10071827-819f8dcd0d3ca74c@in.liquidplanner.com) 
+
+Subject: Fwd: Re: SR #3-7598236378: M4000 / domain not booting 
+
+Sending this in to archive this email thread between myself and the 
+Oracle engineer. Hopefully it'll parse in LP without a problem so it 
+doesn't turn into line-wrap garbage (I'll redo it if so).
+
+
+
+Ryan Moore
+Infrastructure Systems Analyst
+Central Piedmont Community College
+Information Technology Services
+Phone: 704.330.6134
+
+
+-------- Original Message --------
+Subject: Re: SR #3-7598236378: M4000 / domain not booting
+Date: Mon, 5 Aug 2013 11:33:31 -0400
+From: Ryan Moore &lt;ryan.moore@cpcc.edu&gt;
+To: Chris Morton &lt;christopher.morton@oracle.com&gt;
+
+Ah ok, just wanted to double check. As the drive has been mailed out
+hopefully that will get processed this week, Thanks.
+
+
+Ryan Moore
+Infrastructure Systems Analyst
+Central Piedmont Community College
+Information Technology Services
+Phone: 704.330.6134
+
+-------- Original Message  --------
+Subject: Re: SR #3-7598236378: M4000 / domain not booting
+From: Chris Morton &lt;christopher.morton@oracle.com&gt;
+To: Ryan Moore &lt;Ryan.Moore@cpcc.edu&gt;
+Date: 08/05/2013 11:30 AM
+
+&gt; The SR cannot be closed until the FS Task used to ship the replacement
+&gt; SAS HD is closed.
+&gt;
+&gt; The FS Task cannot be closed until our logistics partner receives the
+&gt; faulty SAS HD via shipment from you (unless this particular disk model
+&gt; is considered a consumable).
+&gt;
+&gt; So there is nothing I can do to bring this SR to a close until that
+&gt; return shipment is processed.  The SR will auto-close once the FS Task
+&gt; is closed by our logistics partner.
+&gt;
+&gt;
+&gt; --
+&gt; Christopher Morton
+&gt; SPARC Enterprise Support Engineer
+&gt; Oracle Global Systems Technology Service Center
+&gt;
+&gt; Phone: +1 (800) 223-1711 opt 1, SR #
+&gt; Shift: Sun - Wed, 10:30 - 21:30 (Eastern)
+&gt;
+&gt; Oracle &lt;https://support.oracle.com/&gt;
+&gt;
+&gt;
+&gt; On 8/5/2013 11:26, Ryan Moore wrote:
+&gt;&gt; Just following up on this as I think we can probably bring this SR to a
+&gt;&gt; close. The disk was installed last week and I got it reconfigured for
+&gt;&gt; SVM mirroring. Having poked around the system once I got it booting I
+&gt;&gt; learned that there were two boot environments configured via LiveUpdate,
+&gt;&gt; that the previous admin had not collapsed back into one. With the disk
+&gt;&gt; failure that was the cause of the system not booting, as the boot-device
+&gt;&gt; was set to the failed disk.
+&gt;&gt;
+&gt;&gt; The return package with the failed drive was dropped off with Fedex last
+&gt;&gt; week so should be arriving there shortly. Let me know what else is
+&gt;&gt; needed from this end, if anything, to close this ticket out, Thanks.
+&gt;&gt;
+&gt;&gt;
+&gt;&gt; Ryan Moore
+&gt;&gt; Infrastructure Systems Analyst
+&gt;&gt; Central Piedmont Community College
+&gt;&gt; Information Technology Services
+&gt;&gt; Phone: 704.330.6134
+&gt;&gt;
+&gt;&gt; -------- Original Message  --------
+&gt;&gt; Subject: Re: SR #3-7598236378: M4000 / domain not booting
+&gt;&gt; From: Chris Morton &lt;christopher.morton@oracle.com&gt;
+&gt;&gt; To: Ryan Moore &lt;Ryan.Moore@cpcc.edu&gt;
+&gt;&gt; Date: 07/30/2013 12:39 PM
+&gt;&gt;
+&gt;&gt;&gt; The disk at the following location appears to be 'disk1':
+&gt;&gt;&gt;
+&gt;&gt;&gt;       /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/disk@1,0:a
+&gt;&gt;&gt;
+&gt;&gt;&gt; The disk in slot HDD#1 is 'disk1' per OBP's alias definition.  This
+&gt;&gt;&gt; would explain why the domain was having problems booting from the
+&gt;&gt;&gt; default boot device (because 'disk1' is apparently the default boot
+&gt;&gt;&gt; device).
+&gt;&gt;&gt;
+&gt;&gt;&gt; You could be able to change the default boot device from the OBP shell
+&gt;&gt;&gt; via the following command:
+&gt;&gt;&gt;
+&gt;&gt;&gt;       ok&gt;  setenv boot-device disk
+&gt;&gt;&gt;       ok&gt;  reset-all
+&gt;&gt;&gt;
+&gt;&gt;&gt; Please let me know if that works without issues for you.
+&gt;&gt;&gt;
+&gt;&gt;&gt;
+&gt;&gt;&gt; --
+&gt;&gt;&gt; Christopher Morton
+&gt;&gt;&gt; SPARC Enterprise Support Engineer
+&gt;&gt;&gt; Oracle Global Systems Technology Service Center
+&gt;&gt;&gt;
+&gt;&gt;&gt; Phone: +1 (800) 223-1711 opt 1, SR #
+&gt;&gt;&gt; Shift: Sun - Wed, 10:30 - 21:30 (Eastern)
+&gt;&gt;&gt;
+&gt;&gt;&gt; Oracle &lt;https://support.oracle.com/&gt;
+&gt;&gt;&gt;
+&gt;&gt;&gt;
+&gt;&gt;&gt; On 7/30/2013 11:56, Ryan Moore wrote:
+&gt;&gt;&gt;&gt; The default boot not working as you mentioned in your first comment
+&gt;&gt;&gt;&gt; below concerns me somewhat as well, mainly due to my lack of knowledge
+&gt;&gt;&gt;&gt; regarding the filesystem configuration.
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; I didn't dig through the snapshot that was emailed but looking at just
+&gt;&gt;&gt;&gt; the boot-device environment variable it is set to:
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; {0} ok printenv boot-device
+&gt;&gt;&gt;&gt; boot-device = /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/disk@1,0:a disk:a
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; Where as the 'disk' alias (as passed by `boot disk` I'm guessing) is
+&gt;&gt;&gt;&gt; different:
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; {0} ok devalias
+&gt;&gt;&gt;&gt; cdrom     /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/disk@3,0:f
+&gt;&gt;&gt;&gt; net       /pci@0,600000/pci@0/pci@8/pci@0/network@2
+&gt;&gt;&gt;&gt; disk      /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/disk@0
+&gt;&gt;&gt;&gt; name                     aliases
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; Could that be the reason `boot disk` worked where as the default boot
+&gt;&gt;&gt;&gt; method did not? It looks like it is trying to boot from the second disk,
+&gt;&gt;&gt;&gt; which would make sense why the normal boot just hangs as the bootloader
+&gt;&gt;&gt;&gt; is waiting for the scsi controller to init the drive which never
+&gt;&gt;&gt;&gt; happens.
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; I tried executing the following which resulted in a boot (after a short
+&gt;&gt;&gt;&gt; delay), ending up at the same root password for system maintenance
+&gt;&gt;&gt;&gt; prompt, as would be expected given the system state:
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; {0} ok boot /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/disk
+&gt;&gt;&gt;&gt; Boot device: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/disk  File and args:
+&gt;&gt;&gt;&gt; SunOS Release 5.10 Version Generic_147440-25 64-bit
+&gt;&gt;&gt;&gt; Copyright (c) 1983, 2012, Oracle and/or its affiliates. All rights
+&gt;&gt;&gt;&gt; reserved.
+&gt;&gt;&gt;&gt; ...
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; Would it be prudent to change the 'boot-device' environment variable and
+&gt;&gt;&gt;&gt; write it to nvram, and if so what should it be changed to? I'm guessing
+&gt;&gt;&gt;&gt; either the boot parameter I passed above, or updating the 'disk'
+&gt;&gt;&gt;&gt; devalias to that and setting 'boot-device=disk'. I'm still waiting on
+&gt;&gt;&gt;&gt; access to the secure room where that server is housed to remove the
+&gt;&gt;&gt;&gt; failed drive. My boss has that key and he is out of the office the first
+&gt;&gt;&gt;&gt; half of the day, sorry about that.
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; Ryan Moore
+&gt;&gt;&gt;&gt; Infrastructure Systems Analyst
+&gt;&gt;&gt;&gt; Central Piedmont Community College
+&gt;&gt;&gt;&gt; Information Technology Services
+&gt;&gt;&gt;&gt; Phone: 704.330.6134
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt; -------- Original Message  --------
+&gt;&gt;&gt;&gt; Subject: Re: SR #3-7598236378: M4000 / domain not booting
+&gt;&gt;&gt;&gt; From: Chris Morton &lt;christopher.morton@oracle.com&gt;
+&gt;&gt;&gt;&gt; To: Ryan Moore &lt;Ryan.Moore@cpcc.edu&gt;
+&gt;&gt;&gt;&gt; Date: 07/29/2013 08:37 PM
+&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; I find it interesting that just 'boot' was not working for you previous
+&gt;&gt;&gt;&gt;&gt; (per the console logs that the XSCF snapshot utility had copied) but
+&gt;&gt;&gt;&gt;&gt; 'boot disk' did work.
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; Based on the SCSI errors following the boot, it appears that the
+&gt;&gt;&gt;&gt;&gt; disk in
+&gt;&gt;&gt;&gt;&gt; slot HDD#1 (c0t1d0 I assume) is dead.  That SAS HD will need to be
+&gt;&gt;&gt;&gt;&gt; replaced, and based on the 'probe-scsi-all' output, it is a 146 GB
+&gt;&gt;&gt;&gt;&gt; model.
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; You could safely power down the domain "oc196-m4000" if you wished
+&gt;&gt;&gt;&gt;&gt; to do
+&gt;&gt;&gt;&gt;&gt; so.  While it is powered down, you could also safely eject the SAS
+&gt;&gt;&gt;&gt;&gt; HD in
+&gt;&gt;&gt;&gt;&gt; slot HDD#1 and keep it disconnected from the disk backplane while you
+&gt;&gt;&gt;&gt;&gt; wait for a replacement.  If you decide to do this, then I would also
+&gt;&gt;&gt;&gt;&gt; like for you to read the disk label on that faulty disk in slot HDD#1
+&gt;&gt;&gt;&gt;&gt; and provide me with the Sun PN (i.e., part number, which should be a
+&gt;&gt;&gt;&gt;&gt; string of digits in the format of xxx-xxxx-xx) in a reply to this
+&gt;&gt;&gt;&gt;&gt; email.
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; The internal SAS HDs within M3000, M4000, and M5000 servers are
+&gt;&gt;&gt;&gt;&gt; categorized as CRUs (Customer Replaceable Units) per the Oracle System
+&gt;&gt;&gt;&gt;&gt; Handbook; therefore, our policy is to just ship you the replacement SAS
+&gt;&gt;&gt;&gt;&gt; HD to your data center or other site with the expectation that your own
+&gt;&gt;&gt;&gt;&gt; on-site personnel would perform the physical disk replacement.
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; Please let me know if the following address is a valid shipping address
+&gt;&gt;&gt;&gt;&gt; for the replacement SAS HD:
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;        1325 E SEVENTH ST
+&gt;&gt;&gt;&gt;&gt;        CHARLOTTE, NC 28204
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; Thank you for choosing Oracle.
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; --
+&gt;&gt;&gt;&gt;&gt; Christopher Morton
+&gt;&gt;&gt;&gt;&gt; SPARC Enterprise Support Engineer
+&gt;&gt;&gt;&gt;&gt; Oracle Global Systems Technology Service Center
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; Phone: +1 (800) 223-1711 opt 1, SR #
+&gt;&gt;&gt;&gt;&gt; Shift: Sun - Wed, 10:30 - 21:30 (Eastern)
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; Oracle &lt;https://support.oracle.com/&gt;
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt; On 7/29/2013 19:34, Ryan Moore wrote:
+&gt;&gt;&gt;&gt;&gt;&gt; I'm not able to change the key at the moment, I don't have access
+&gt;&gt;&gt;&gt;&gt;&gt; to the
+&gt;&gt;&gt;&gt;&gt;&gt; room personally and those that do have left so I will go back tomorrow
+&gt;&gt;&gt;&gt;&gt;&gt; to do so. However I did run the probe-scsi-all command and it does
+&gt;&gt;&gt;&gt;&gt;&gt; look
+&gt;&gt;&gt;&gt;&gt;&gt; like the second HDD is timing out and not fully reporting to the
+&gt;&gt;&gt;&gt;&gt;&gt; controller as the size isn't being reported:
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; --
+&gt;&gt;&gt;&gt;&gt;&gt; /pci@0,600000/pci@0/pci@8/pci@0/scsi@1
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; MPT Version 1.05, Firmware Version 1.11.00.00
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Target 0
+&gt;&gt;&gt;&gt;&gt;&gt; Unit 0   Disk     SEAGATE ST914602SSUN146G0603    286739329 Blocks,
+&gt;&gt;&gt;&gt;&gt;&gt; 146 GB
+&gt;&gt;&gt;&gt;&gt;&gt;       SASAddress 5000c5000f83cc19  PhyNum 0
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Target 1
+&gt;&gt;&gt;&gt;&gt;&gt; Unit 0   Disk     SEAGATE ST914602SSUN146G0603
+&gt;&gt;&gt;&gt;&gt;&gt;       SASAddress 5000c5000f94a289  PhyNum 1
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Target 3
+&gt;&gt;&gt;&gt;&gt;&gt; Unit 0   Removable Read Only device     TEAC    DV-W28E-R       M.0B
+&gt;&gt;&gt;&gt;&gt;&gt;       SATA device  PhyNum 3
+&gt;&gt;&gt;&gt;&gt;&gt; --
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; After executing `boot disk` on the OBP it comes up to a root password
+&gt;&gt;&gt;&gt;&gt;&gt; for system maintenance prompt, after outputting drive errors:
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; --
+&gt;&gt;&gt;&gt;&gt;&gt; {0} ok boot disk
+&gt;&gt;&gt;&gt;&gt;&gt; Boot device: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/disk@0  File and
+&gt;&gt;&gt;&gt;&gt;&gt; args:
+&gt;&gt;&gt;&gt;&gt;&gt; SunOS Release 5.10 Version Generic_147440-25 64-bit
+&gt;&gt;&gt;&gt;&gt;&gt; Copyright (c) 1983, 2012, Oracle and/or its affiliates. All rights
+&gt;&gt;&gt;&gt;&gt;&gt; reserved.
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/sd@1,0 (sd0):
+&gt;&gt;&gt;&gt;&gt;&gt;         drive offline
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/sd@1,0 (sd0):
+&gt;&gt;&gt;&gt;&gt;&gt;         drive offline
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/sd@1,0 (sd0):
+&gt;&gt;&gt;&gt;&gt;&gt;         drive offline
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/sd@1,0 (sd0):
+&gt;&gt;&gt;&gt;&gt;&gt;         drive offline
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/sd@1,0 (sd0):
+&gt;&gt;&gt;&gt;&gt;&gt;         drive offline
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/sd@1,0 (sd0):
+&gt;&gt;&gt;&gt;&gt;&gt;         drive offline
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/sd@1,0 (sd0):
+&gt;&gt;&gt;&gt;&gt;&gt;         drive offline
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/sd@1,0 (sd0):
+&gt;&gt;&gt;&gt;&gt;&gt;         drive offline
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /pci@0,600000/pci@0/pci@8/pci@0/scsi@1/sd@1,0 (sd0):
+&gt;&gt;&gt;&gt;&gt;&gt;         drive offline
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Hostname: oc196-m4000
+&gt;&gt;&gt;&gt;&gt;&gt; Insufficient metadevice database replicas located.
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Use metadb to delete databases which are broken.
+&gt;&gt;&gt;&gt;&gt;&gt; Ignore any Read-only file system error messages.
+&gt;&gt;&gt;&gt;&gt;&gt; Reboot the system when finished to reload the metadevice database.
+&gt;&gt;&gt;&gt;&gt;&gt; After reboot, repair any broken database replicas which were deleted.
+&gt;&gt;&gt;&gt;&gt;&gt; Jul 29 19:28:26 svc.startd[9]: svc:/system/metainit:default: Method
+&gt;&gt;&gt;&gt;&gt;&gt; "/lib/svc/method/svc-metainit" failed with exit status 96.
+&gt;&gt;&gt;&gt;&gt;&gt; Jul 29 19:28:26 svc.startd[9]: system/metainit:default misconfigured:
+&gt;&gt;&gt;&gt;&gt;&gt; transitioned to maintenance (see 'svcs -xv' for details)
+&gt;&gt;&gt;&gt;&gt;&gt; Jul 29 19:28:30 svc.startd[9]: svc:/system/filesystem/usr:default:
+&gt;&gt;&gt;&gt;&gt;&gt; Method "/lib/svc/method/fs-usr" failed with exit status 95.
+&gt;&gt;&gt;&gt;&gt;&gt; Jul 29 19:28:30 svc.startd[9]: system/filesystem/usr:default failed
+&gt;&gt;&gt;&gt;&gt;&gt; fatally: transitioned to maintenance (see 'svcs -xv' for details)
+&gt;&gt;&gt;&gt;&gt;&gt; Requesting System Maintenance Mode
+&gt;&gt;&gt;&gt;&gt;&gt; (See /lib/svc/share/README for more information.)
+&gt;&gt;&gt;&gt;&gt;&gt; Console login service(s) cannot run
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Root password for system maintenance (control-d to bypass): WARNING:
+&gt;&gt;&gt;&gt;&gt;&gt; /pci@2,600000/SUNW,qlc@0/fp@0,0/ssd@w200500a0b80f6781,1f (ssd2):
+&gt;&gt;&gt;&gt;&gt;&gt;         Corrupt label; wrong magic number
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; WARNING: /scsi_vhci/ssd@g600a0b80000f6720000000194fcda5e7 (ssd5):
+&gt;&gt;&gt;&gt;&gt;&gt;         Corrupt label; wrong magic number
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Login incorrect
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Root password for system maintenance (control-d to bypass):
+&gt;&gt;&gt;&gt;&gt;&gt; --
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; I have left the server at that prompt for the time being for fear of
+&gt;&gt;&gt;&gt;&gt;&gt; corrupting anything further as I'm unfamiliar with Solaris. If like
+&gt;&gt;&gt;&gt;&gt;&gt; Linux (or vice versa I suppose) then the volumes are read-only but let
+&gt;&gt;&gt;&gt;&gt;&gt; me know if it is safe to issue a powerdown there and I will follow up
+&gt;&gt;&gt;&gt;&gt;&gt; after changing the key position.
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Ryan Moore
+&gt;&gt;&gt;&gt;&gt;&gt; Infrastructure Systems Analyst
+&gt;&gt;&gt;&gt;&gt;&gt; Central Piedmont Community College
+&gt;&gt;&gt;&gt;&gt;&gt; Information Technology Services
+&gt;&gt;&gt;&gt;&gt;&gt; Phone: 704.330.6134
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; -------- Original Message  --------
+&gt;&gt;&gt;&gt;&gt;&gt; Subject: Re: SR #3-7598236378: M4000 / domain not booting
+&gt;&gt;&gt;&gt;&gt;&gt; From: Chris Morton &lt;christopher.morton@oracle.com&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; To: Ryan Moore &lt;Ryan.Moore@cpcc.edu&gt;
+&gt;&gt;&gt;&gt;&gt;&gt; Date: 07/29/2013 06:38 PM
+&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; After reviewing the XSCF snapshot, we are not seeing any blatant
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; hardware component failures within this M4000 server.  There are no
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; components currently listed in either Degraded or Faulted status
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; according to the XSCF within this M4000 server.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; However, the internal SAS HDs are not subject to that fault
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; management
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; tagging to where they could be labeled as Degraded or Faulted.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Therefore, we must use other means to determine if one of the
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; internal
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; SAS HDs is faulty (where I assume your root filesystem is currently
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; stored).
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Please turn the physical keyswitch on the front of the current Locked
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; position to the Service position.  That will prevent the M4000 domain
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; from attempting to auto-boot into Solaris.  Once that has been done,
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; please issue the following commands:
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;         XSCF&gt;  poweroff -d 0
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;         XSCF&gt;  poweron -d 0
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;         XSCF&gt;  console -d 0
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; That should force the domain to reset and start the console
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; connection
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; to Domain ID 0 (DID#0).  Eventually, the POST tests should complete
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; (hopefully without errors) and then present you with the OBP ok&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; prompt.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;       At that prompt, please issue the following diagnostic command:
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;         ok&gt;  probe-scsi-all
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Once that command finishes returning output and returns a new ok&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; prompt, please copy and past the output from that above OBP
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; command and
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; paste it into a reply to this email.  We would also like for you to
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; attempt to boot off either of the 2 root mirrored disks via the
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; following OBP commands (providing us the output regardless of either
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; command's success or failure):
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;         ok&gt;  boot disk
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;         ok&gt;  boot disk1
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Instead of copying / pasting test from your console session above,
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; you
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; could simply run the XSCF snapshot utility once again after all of
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; the
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; above steps have been completed (regardless of their success or
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; failure)
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; as it will copy the console logs via the snapshot.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Thank you for choosing Oracle.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; --
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Christopher Morton
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; SPARC Enterprise Support Engineer
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Oracle Global Systems Technology Service Center
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Phone: +1 (800) 223-1711 opt 1, SR #
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Shift: Sun - Wed, 10:30 - 21:30 (Eastern)
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; Oracle &lt;https://support.oracle.com/&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; On 7/29/2013 16:39, Ryan Moore wrote:
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Snapshot has been uploaded, let me know what else is needed from
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; this
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; end, Thanks
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Ryan Moore
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Infrastructure Systems Analyst
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Central Piedmont Community College
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Information Technology Services
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Phone: 704.330.6134
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; -------- Original Message  --------
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Subject: SR #3-7598236378: M4000 / domain not booting
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; From: Chris Morton &lt;christopher.morton@oracle.com&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; To: Ryan Moore &lt;Ryan.Moore@cpcc.edu&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Date: 07/29/2013 04:26 PM
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; M4000 serial#:  BEF0913174
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; We will require the XSCF snapshot (with full log set but with
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; log-only
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; mode disabled) from the Mx000 server experiencing this issue.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Please
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; upload the XSCF snapshot to our Supportfiles server under the
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; /cores
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; directory (either via https or sftp) per my explicit instructions
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; listed
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; below.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          ---  Generating Mx000 Snapshot Output  ---
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Please run a snapshot from the XSCF (the System Controller) on your
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Mx000 server with the either of the following XSCF commands:
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          XSCF&gt;  snapshot -L F -t
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; &lt;user&gt;@&lt;host&gt;:&lt;/path/to/SCP/directory&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          XSCF&gt;  snapshot -L F -d usb0
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Please review the following XSCF documentation for additional
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; assistance
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; if necessary:
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          "SPARC Enterprise Mx000 Servers Administration Guide"
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          http://docs.oracle.com/cd/E19855-01/E21618/E21618.pdf
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          "SPARC Enterprise Mx000 Servers XSCF User's Guide"
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          http://docs.oracle.com/cd/E19855-01/E25381/E25381.pdf
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          "SPARC Enterprise Mx000 Servers XSCF Reference Manual"
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          http://docs.oracle.com/cd/E19855-01/E21466-01/E21466-01.pdf
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; The 1st method above uses SCP to copy it to a remote server
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; while the
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2nd method is for saving the snapshot to a locally-attached USB
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; thumb
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; drive (which requires you to have local physical access to the
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; server).
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          ---  Uploading Mx000 Snapshot Output  ---
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 1)  Rename the snapshot*.zip file to include the Sun Case ID at the
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; very
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; beginning of the filename (for example,
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 3-1234567890.snapshot*.zip).
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2)  Upload the snapshot file that you have just renamed to Sun's
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; FTP
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; server using the following settings:
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          https/sftp server name:   supportfiles.sun.com
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          sftp username:            anonymous
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          upload directory:         /cores
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;          transfer mode:            bin  (binary)
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 3)  Reply to this email once the snapshot file has been uploaded
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; successfully with the full filename of the snapshot file that you
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; have
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; uploaded.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Thank you for choosing Oracle.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 
+Ryan Moore said: From: Ryan Moore (ryan.moore@cpcc.edu (mailto:ryan.moore@cpcc.edu)) 
+
+To: 10071827-819f8dcd0d3ca74c@in.liquidplanner.com (mailto:10071827-819f8dcd0d3ca74c@in.liquidplanner.com) 
+
+CC: Chad.Campbell@cpcc.edu (mailto:Chad.Campbell@cpcc.edu), Kunal.Patel@cpcc.edu (mailto:Kunal.Patel@cpcc.edu) 
+
+Subject: Re: Issue Tracking 
+
+Oracle support has been contacted, Ticket ID assigned is 3-7598236378
+Waiting to hear back from an engineer from their support department.
+
+Additional details (from oc1960m4000 fault logs)
+Msg-ID: SCF-8001-KC
+Event-ID: a52d634c-39f7-47f8-ac49-83afa2e2fd46
+
+Ryan Moore
+Infrastructure Systems Analyst
+Central Piedmont Community College
+Information Technology Services
+Phone: 704.330.6134
+
+-------- Original Message  --------
+Subject: Issue Tracking 
+Chad Campbell said: From: Chad Campbell (Chad.Campbell@cpcc.edu (mailto:Chad.Campbell@cpcc.edu)) 
+
+To: Ryan.Moore@cpcc.edu (mailto:Ryan.Moore@cpcc.edu) 
+
+CC: 10071827-819f8dcd0d3ca74c@in.liquidplanner.com (mailto:10071827-819f8dcd0d3ca74c@in.liquidplanner.com), Kunal.Patel@cpcc.edu (mailto:Kunal.Patel@cpcc.edu) 
+
+Subject: Issue Tracking 
+
+Let’s try to use this as an opportunity to test liquidplanner for issue tracking.
+
+I created a task under Break/Fix -> Issue Tracking named Service Outage: OC196-M4000. The email address for the task is copied, but you can hit it at 10071827-819f8dcd0d3ca74c@in.liquidplanner.com (mailto:10071827-819f8dcd0d3ca74c@in.liquidplanner.com)
+
+I tested, and it looks like it will add the emails we send into the comments for the task. As you gather information or the status changes (ie. Oracle is contacted, eta’s are determined) send an email to this address.
+
+--
+
+Chad Campbell
+
+Director of Core Systems and Telecommunications
+
+Central Piedmont Community College
+
+Information Technology Services
+
+Ph: 704.330.6598
+
+Fax: 704.330.5490 
+Waiting a sec
